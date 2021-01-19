@@ -60,9 +60,9 @@ contract Voting is Ownable{
         emit WorkflowStatusChange(WorkflowStatus.RegisteringVoters,WorkflowStatus.ProposalsRegistrationStarted);
     }
     // 3) Whitelisted voters can register proposals
-    function saveProposal(address _address,string memory _description) public {
+    function saveProposal(string memory _description) public {
         require(workflow == WorkflowStatus.ProposalsRegistrationStarted,"Saving a proposal must be during the Registration workflow");
-        require(whitelist[_address].isRegistered,"A voter must be registered to save a proposal");
+        require(whitelist[msg.sender].isRegistered,"A voter must be registered to save a proposal");
         Proposal memory newProposal;
         newProposal.description = _description;
         proposals[proposalId] = newProposal;
@@ -86,13 +86,14 @@ contract Voting is Ownable{
         
     }
     // 6) Whitelisted voters can vote for proposals
-    function voteForProposal(address _address, uint256 _proposalId) public {
+    function voteForProposal(uint256 _proposalId) public {
         require(workflow == WorkflowStatus.VotingSessionStarted,"Voting for proposal must be during the Voting session");
-        require(whitelist[_address].isRegistered,"A voter must be registered to save a proposal");
+        require(whitelist[msg.sender].isRegistered,"A voter must be registered to save a proposal");
         require(_proposalId <= proposalId,"your choice of proposal is too high, there are less proposals");
-        whitelist[_address].hasVoted = true;
-        whitelist[_address].votedProposalId = _proposalId;
+        whitelist[msg.sender].hasVoted = true;
+        whitelist[msg.sender].votedProposalId = _proposalId;
         proposals[_proposalId].voteCount++;
+        emit Voted(msg.sender,_proposalId);
     }
     
     // 7) Owner makes voting session end
