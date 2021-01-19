@@ -4,7 +4,12 @@ pragma solidity 0.6.11;
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/contracts/access/Ownable.sol";
 
 contract Voting is Ownable{
-    
+    /*
+    TO DO
+    - Assert each voter vote once ! a mapping ?!
+    - Understand the event change workflow
+    - Put some assert for the count before and after vote etc...
+    */
     struct Voter {
         bool isRegistered;
         bool hasVoted;
@@ -53,7 +58,7 @@ contract Voting is Ownable{
     }
     
     // 2) Owner makes register session begin
-    function turnWorkflowProposalsRegistrationStarted() public onlyOwner {
+    function startProposalsRegistration() public onlyOwner {
         require(workflow == WorkflowStatus.RegisteringVoters,"Must be in the RegisteringVoters to start ProposalsRegistration");
         workflow = WorkflowStatus.ProposalsRegistrationStarted;
         emit ProposalsRegistrationStarted();
@@ -71,14 +76,14 @@ contract Voting is Ownable{
     }
     
     // 4) Owner makes register session end
-    function turnWorkflowProposalsRegistrationEnded() public onlyOwner{
+    function endProposalsRegistration() public onlyOwner{
         require(workflow == WorkflowStatus.ProposalsRegistrationStarted,"ProposalsRegistration must have been started to end it");
         workflow = WorkflowStatus.ProposalsRegistrationEnded;
         emit ProposalsRegistrationEnded();
         emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationStarted,WorkflowStatus.ProposalsRegistrationEnded);
     }
     // 5) Owner makes voting session begin
-    function turnWorkflowVotingSessionStarted() public onlyOwner {
+    function startVotingSession() public onlyOwner {
         require(workflow == WorkflowStatus.ProposalsRegistrationEnded,"ProposalsRegistration must end before to start the VotingSession");
         workflow = WorkflowStatus.VotingSessionStarted;
         emit VotingSessionStarted();
@@ -97,14 +102,14 @@ contract Voting is Ownable{
     }
     
     // 7) Owner makes voting session end
-    function turnWorkflowVotingSessionEnded() public onlyOwner {
+    function endVotingSession() public onlyOwner {
         require(workflow == WorkflowStatus.VotingSessionStarted,"VotingSession must have been started to end it");
         workflow = WorkflowStatus.VotingSessionEnded;
         emit VotingSessionEnded();
         emit WorkflowStatusChange(WorkflowStatus.VotingSessionStarted,WorkflowStatus.VotingSessionEnded);
     }
     // 8) Owner count the votes
-    function turnWorkflowVotesTallied() public onlyOwner {
+    function tallyVotes() public onlyOwner {
         require(workflow == WorkflowStatus.VotingSessionEnded,"VotingSession must have ended before VotesTallied");
         workflow = WorkflowStatus.VotesTallied;
         emit VotesTallied();
@@ -119,7 +124,12 @@ contract Voting is Ownable{
     }
     
     // 9) Everyone can see the restults
-    function getWinningProposal() public returns(uint256){
+    function getWinningProposal() public view returns(uint256){
         return winningProposalId;
+    }
+    
+      // non mandatory for Defi but useful for my test
+    function getNumOfProposals() public view onlyOwner returns(uint256){
+        return proposalId;
     }
 }
