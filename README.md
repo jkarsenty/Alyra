@@ -1,4 +1,4 @@
 # Alyra
-
-The Defi 1 is the Voting.sol file.  
-I will organise my repo "Alyra" later to have folder for each Defi and Readme more consistent etc...
+Repository of all the Defi of training given by Alyra to become a Blockchain Developper.  
+**Each Defi will be in a new folder.**  
+To have more info on Alyra go on : https://alyra.fr  
