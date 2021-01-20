@@ -5,10 +5,7 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/contracts/access/
 
 contract Voting is Ownable{
     /*
-    TO DO
-    - Assert each voter vote once ! a mapping ?!
-    - Understand the event change workflow
-    - Put some assert for the count before and after vote etc...
+    Can be improved with some assert to check the count of vote after and before votes etc...
     */
     struct Voter {
         bool isRegistered;
@@ -64,6 +61,7 @@ contract Voting is Ownable{
         emit ProposalsRegistrationStarted();
         emit WorkflowStatusChange(WorkflowStatus.RegisteringVoters,WorkflowStatus.ProposalsRegistrationStarted);
     }
+    
     // 3) Whitelisted voters can register proposals
     function saveProposal(string memory _description) public {
         require(workflow == WorkflowStatus.ProposalsRegistrationStarted,"Saving a proposal must be during the Registration workflow");
@@ -82,6 +80,7 @@ contract Voting is Ownable{
         emit ProposalsRegistrationEnded();
         emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationStarted,WorkflowStatus.ProposalsRegistrationEnded);
     }
+    
     // 5) Owner makes voting session begin
     function startVotingSession() public onlyOwner {
         require(workflow == WorkflowStatus.ProposalsRegistrationEnded,"ProposalsRegistration must end before to start the VotingSession");
@@ -90,11 +89,13 @@ contract Voting is Ownable{
         emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationEnded,WorkflowStatus.VotingSessionStarted);
         
     }
+    
     // 6) Whitelisted voters can vote for proposals
     function voteForProposal(uint256 _proposalId) public {
         require(workflow == WorkflowStatus.VotingSessionStarted,"Voting for proposal must be during the Voting session");
         require(whitelist[msg.sender].isRegistered,"A voter must be registered to save a proposal");
-        require(_proposalId <= proposalId,"your choice of proposal is too high, there are less proposals");
+        require(_proposalId <= proposalId,"Your choice of proposal is too high, there are less proposals");
+        require(!whitelist[msg.sender].hasVoted,"Voter can only vote once");
         whitelist[msg.sender].hasVoted = true;
         whitelist[msg.sender].votedProposalId = _proposalId;
         proposals[_proposalId].voteCount++;
@@ -108,6 +109,7 @@ contract Voting is Ownable{
         emit VotingSessionEnded();
         emit WorkflowStatusChange(WorkflowStatus.VotingSessionStarted,WorkflowStatus.VotingSessionEnded);
     }
+    
     // 8) Owner count the votes
     function tallyVotes() public onlyOwner {
         require(workflow == WorkflowStatus.VotingSessionEnded,"VotingSession must have ended before VotesTallied");
