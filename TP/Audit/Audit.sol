@@ -27,10 +27,10 @@ contract Crowdsale {
         balances[msg.sender] = balances[msg.sender].add(msg.value);
         savedBalance = savedBalance.add(msg.value);
 
-        // TO DO :
-        // - do not use .send but use transfer instead or use .call{value: amount}("") (voir §3)
-        // - besoin de gerer l'exception si l'envoi echoue (voir §4 )
-        escrow.transfer(msg.value);
+        (bool success, ) = escrow.call{value: msg.value}("");
+        if (!success) {
+            // gerer exception
+        }
     }
 
     // refund investisor
@@ -42,9 +42,9 @@ contract Crowdsale {
         savedBalance = savedBalance.sub(payment);
         balances[payee] = 0;
 
-        // TO DO :
-        // - do not use .send but use transfer instead or use .call{value: amount}("") (voir §3)
-        // - besoin de gerer l'exception si l'envoi echoue (voir §4 )
-        payee.transfer(payment);
+        (bool success, ) = payee.call{value: payment}("");
+        if (!success) {
+            // gerer exception
+        }
     }
 }

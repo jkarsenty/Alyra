@@ -8,7 +8,6 @@ contract Crowdsale {
     using SafeMath for uint256;
 
     // AUDIT : créer des evenements car il n'y en a aucun
-    // AUDIT : use pullPayment method
     // AUDIT : Add some require
 
     // AUDIT : better to use the audited librairy of Zeppelin with is Ownable
